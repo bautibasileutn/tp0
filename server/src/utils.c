@@ -2,6 +2,7 @@
 
 t_log* logger;
 
+/*
 int iniciar_servidor(void)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
@@ -29,7 +30,49 @@ int iniciar_servidor(void)
 
 	return socket_servidor;
 }
+*/
 
+int iniciar_servidor(void)
+{
+	int socket_servidor;
+
+	struct addrinfo hints, *servinfo, *p;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+	getaddrinfo(NULL, PUERTO, &hints, &servinfo);
+
+	// Recorremos la lista y tratamos de crear/bindear
+	for (p = servinfo; p != NULL; p = p->ai_next)
+	{
+		// Crear socket
+		socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+		if (socket_servidor == -1)
+			continue;
+
+		// Bind
+		if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1)
+		{
+			close(socket_servidor);
+			continue;
+		}
+
+		break; // si salió bien, cortamos
+	}
+
+	// Escuchar
+	listen(socket_servidor, SOMAXCONN);
+
+	freeaddrinfo(servinfo);
+
+	log_trace(logger, "Listo para escuchar a mi cliente");
+
+	return socket_servidor;
+}
+/*
 int esperar_cliente(int socket_servidor)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
@@ -37,6 +80,21 @@ int esperar_cliente(int socket_servidor)
 
 	// Aceptamos un nuevo cliente
 	int socket_cliente;
+	log_info(logger, "Se conecto un cliente!");
+
+	return socket_cliente;
+}
+*/
+
+int esperar_cliente(int socket_servidor)
+{
+	int socket_cliente = accept(socket_servidor, NULL, NULL);
+
+	if (socket_cliente == -1) {
+		perror("Error en accept");
+		exit(EXIT_FAILURE);
+	}
+
 	log_info(logger, "Se conecto un cliente!");
 
 	return socket_cliente;

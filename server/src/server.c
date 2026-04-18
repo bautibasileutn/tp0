@@ -14,10 +14,17 @@ int main(void) {
 		case MENSAJE:
 			recibir_mensaje(cliente_fd);
 			break;
-		case PAQUETE:
+		/*case PAQUETE:
 			lista = recibir_paquete(cliente_fd);
 			log_info(logger, "Me llegaron los siguientes valores:\n");
 			list_iterate(lista, (void*) iterator);
+			break;
+		*/
+		case PAQUETE:
+			lista = recibir_paquete(cliente_fd);
+			log_info(logger, "Me llegaron los siguientes valores:\n");
+			list_iterate(lista, iterator);
+			list_destroy_and_destroy_elements(lista, free);
 			break;
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
@@ -30,6 +37,7 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void iterator(char* value) {
-	log_info(logger,"%s", value);
+void iterator(void* value) {
+	char* str = (char*) value;
+	log_info(logger, "%s", str);
 }
