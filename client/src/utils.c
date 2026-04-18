@@ -16,31 +16,6 @@ void* serializar_paquete(t_paquete* paquete, int bytes)
 	return magic;
 }
 
-/*
-int crear_conexion(char *ip, char* puerto)
-{
-	struct addrinfo hints;
-	struct addrinfo *server_info;
-
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-
-	getaddrinfo(ip, puerto, &hints, &server_info);
-
-	// Ahora vamos a crear el socket.
-	int socket_cliente = 0;
-
-	// Ahora que tenemos el socket, vamos a conectarlo
-
-
-	freeaddrinfo(server_info);
-
-	return socket_cliente;
-}
-*/
-
 int crear_conexion(char *ip, char* puerto)
 {
 	struct addrinfo hints;
@@ -141,17 +116,30 @@ t_log* log_create(
     t_log_level log_level
 );
 
-void leer_consola(t_log* logger) {
-    char* leido;
+void paquete(int conexion)
+{
+	char* leido;
+	t_paquete* paquete = crear_paquete();
 
-    while ((leido = readline("> ")) != NULL) {
-        if (strcmp(leido, "exit") == 0) {
-            free(leido);
-            break;
-        }
+	while (1)
+	{
+		leido = readline("> ");
 
-        log_info(logger, "Leí: %s", leido);
-        free(leido);
-    }
+		if (leido == NULL)
+			break;
+
+		if (strcmp(leido, "") == 0 || strcmp(leido, "exit") == 0)
+		{
+			free(leido);
+			break;
+		}
+
+		printf("Leí: %s\n", leido);
+		agregar_a_paquete(paquete, leido, strlen(leido) + 1);
+		free(leido);
+	}
+
+	enviar_paquete(paquete, conexion);
+	eliminar_paquete(paquete);
 }
 
