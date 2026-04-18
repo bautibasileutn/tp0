@@ -16,6 +16,7 @@ void* serializar_paquete(t_paquete* paquete, int bytes)
 	return magic;
 }
 
+/*
 int crear_conexion(char *ip, char* puerto)
 {
 	struct addrinfo hints;
@@ -33,6 +34,32 @@ int crear_conexion(char *ip, char* puerto)
 
 	// Ahora que tenemos el socket, vamos a conectarlo
 
+
+	freeaddrinfo(server_info);
+
+	return socket_cliente;
+}
+*/
+
+int crear_conexion(char *ip, char* puerto)
+{
+	struct addrinfo hints;
+	struct addrinfo *server_info;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+
+	getaddrinfo(ip, puerto, &hints, &server_info);
+
+	int socket_cliente = socket(server_info->ai_family,
+								server_info->ai_socktype,
+								server_info->ai_protocol);
+
+	if (connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1) {
+		perror("Error en connect");
+		exit(EXIT_FAILURE);
+	}
 
 	freeaddrinfo(server_info);
 
@@ -106,3 +133,25 @@ void liberar_conexion(int socket_cliente)
 {
 	close(socket_cliente);
 }
+
+t_log* log_create(
+    char* file_name,
+    char* process_name,
+    bool is_active_console,
+    t_log_level log_level
+);
+
+void leer_consola(t_log* logger) {
+    char* leido;
+
+    while ((leido = readline("> ")) != NULL) {
+        if (strcmp(leido, "exit") == 0) {
+            free(leido);
+            break;
+        }
+
+        log_info(logger, "Leí: %s", leido);
+        free(leido);
+    }
+}
+
