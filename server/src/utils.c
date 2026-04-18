@@ -53,6 +53,9 @@ int iniciar_servidor(void)
 		if (socket_servidor == -1)
 			continue;
 
+		int yes = 1;
+		setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+
 		// Bind
 		if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1)
 		{
@@ -61,6 +64,11 @@ int iniciar_servidor(void)
 		}
 
 		break; // si salió bien, cortamos
+	}
+
+	if (p == NULL){
+	log_error(logger, "No se pudo bindear el servidor");
+	exit(EXIT_FAILURE);
 	}
 
 	// Escuchar
